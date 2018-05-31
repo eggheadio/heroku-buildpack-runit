@@ -38,5 +38,18 @@ echo "buildpack=runit ps=#{ps} at=exit status=$1 waitpid_lsb=$2"
 exec pkill -HUP -f #{"runsvdir #{SERVICE_DIR}".shellescape}
 EOF
       )
+
+    log_run_path = File.join(SERVICE_DIR, ps, 'log', 'run')
+    FileUtils.mkdir_p(File.dirname(log_run_path))
+
+    File.open(log_run_path, 'w') do |log_f|
+      log_f.write(<<EOF
+#!/bin/sh
+awk '{ printf("[#{ps}] "); print; }'
+EOF
+      )
+    end
+
+    File.chmod(0755, log_run_path)
   end
 end
